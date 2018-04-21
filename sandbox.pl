@@ -1,8 +1,13 @@
+%%% EJERCICIO 1
 numero(0).
 numero(s(X)) :- numero(X).
 
-numOriginal(ParteEntera, ',', ParteDecimal) :- listaPeano(ParteEntera), listaPeano(ParteDecimal).
+numOriginal([ParteEntera|[','|[ParteDecimal|[]]]]) :- esNumero(ParteEntera), esNumero(ParteDecimal).
 numRedondeo(',', ParteEntera, ParteDecimal) :- listaPeano(ParteEntera), listaPeano(ParteDecimal).
+
+esNumero(X) :- numero(X).
+esNumero([X|[]]) :- numero(X).
+esNumero([X|Y]) :- numero(X), esNumero(Y).
 
 listaPeano([]).
 listaPeano([X|Y]) :- numero(X), listaPeano(Y).
@@ -23,19 +28,41 @@ concat([X|Y],Z, [X|Xfinal]) :- numero(X), concat(Y,Z,Xfinal).
 
 sigueNueve(X,Y,Z) :- igual(X,s(s(s(s(s(s(s(s(s(0)))))))))), quitarCabeza(Y,Y2), igual([s(0)|[0|Y2]],Z).
 
+soloNueve([],[]).
 soloNueve(X,[]) :- colaPeano(X,Y), \=(Y,s(s(s(s(s(s(s(s(s(0)))))))))).
 soloNueve(X,[s(s(s(s(s(s(s(s(s(0)))))))))|Y]) :- inicio(X,Z), colaPeano(X,XX), igual(XX,s(s(s(s(s(s(s(s(s(0)))))))))), soloNueve(Z,Y).
 
 convertZero([],[]).
 convertZero([_|X],[0|Y]) :- convertZero(X,Y).
 
-quitarNueve(X,[]) :- primero(X,Y), igual(Y,s(s(s(s(s(s(s(s(s(0)))))))))).
-quitarNueve([X|Y], [X|Z]) :- \=(X,s(s(s(s(s(s(s(s(s(0)))))))))), quitarNueve(Y,Z).
+checkNueves([s(s(s(s(s(s(s(s(s(0)))))))))|[]],[]).
+checkNueves([s(s(s(s(s(s(s(s(s(0)))))))))|Y],[]) :- checkNueves(Y,[]).
 
+quitarNueve(X,X,[]).
+quitarNueve([X|XX], Y, [X|ZZ]) :- quitarNueve(XX,Y,ZZ).
 
 igual(X,X).
 
+mayor(s(s(s(s(s(0)))))).
+mayor(s(X)) :- mayor(X).
+
+menor(0).
+menor(s(0)).
+menor(s(s(0))).
+menor(s(s(s(0)))).
+menor(s(s(s(s(0))))).
+
 suma([],[s(0)]).
-suma(X,Y) :- colaPeano(X,ULT), igual(ULT,s(s(s(s(s(s(s(s(s(0)))))))))), quitarNueve(X,NONUEVE), soloNueve(X,NUEVES), convertZero(NUEVES,ZEROS), suma(NONUEVE,RT), concat(RT,ZEROS,DEV), igual(DEV,Y).
-%suma(X,Y) :- colaPeano(X,ULT), inicio(X,INI).
+suma(X,Y) :- colaPeano(X,ULT), igual(ULT,s(s(s(s(s(s(s(s(s(0)))))))))), soloNueve(X,NUEVES), quitarNueve(X,NUEVES,NONUEVE), convertZero(NUEVES,ZEROS), suma(NONUEVE,RT), concat(RT,ZEROS,DEV), igual(DEV,Y).
 suma(X,Y) :- colaPeano(X,ULT), \=(ULT,s(s(s(s(s(s(s(s(s(0)))))))))), inicio(X, INI), concat(INI,[s(ULT)],DEV), igual(DEV,Y).
+
+redondear(redondeoUnidad, OrEnt, [Decim|_], RedEnt, []) :- mayor(Decim), suma(OrEnt, Y), igual(Y,RedEnt).
+redondear(redondeoUnidad, X, [Decim|_], X, []) :- menor(Decim).
+redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, [RedDec|[]]) :- mayor(Cent), concat(OrEnt, [Decim], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec],DEV).
+redondear(redondeoDecima, X, [Decim|[Cent|_]], X, [Decim|[]]) :- menor(Cent).
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :- mayor(Mili), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
+redondear(redondeoCentesima, X, [Decim|[Cent|[Mili|_]]], X, [Decim|[Cent|[]]]) :- menor(Mili).
+
+redondearDecimal(NOrig, TipoRedondeo, redondeo(TipoRedondeo, numeroOriginal(',', OrEnt, OrDec), numeroRedondeado(',', RedEnt, RedDec))) :- numOriginal(NOrig), redondear(TipoRedondeo, OrEnt, OrDec, RedEnt, RedDec).
+
+%%% EJERCICIO 2
