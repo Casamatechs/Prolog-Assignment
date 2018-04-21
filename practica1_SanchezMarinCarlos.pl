@@ -1,3 +1,5 @@
+alumno_prode('Marin','Sanchez','Carlos','120131').
+
 %%% EJERCICIO 1
 numero(0).
 numero(s(X)) :- numero(X).
