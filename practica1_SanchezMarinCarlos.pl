@@ -66,3 +66,20 @@ redondear(redondeoCentesima, X, [Decim|[Cent|[Mili|_]]], X, [Decim|[Cent|[]]]) :
 redondearDecimal(NOrig, TipoRedondeo, redondeo(TipoRedondeo, numeroOriginal(',', OrEnt, OrDec), numeroRedondeado(',', RedEnt, RedDec))) :- numOriginal(NOrig), redondear(TipoRedondeo, OrEnt, OrDec, RedEnt, RedDec).
 
 %%% EJERCICIO 2
+
+par(s(s(0))).
+par(s(s(X))) :-  par(X).
+
+sumaSecreto(0,X,X).
+sumaSecreto(X,0,X).
+sumaSecreto(s(X),Y,s(Z)) :- sumaSecreto(X,Y,Z).
+
+comprobarSecreto(A,B,C,A,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(C,A,B,A,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(B,C,A,A,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(A,A,B,C,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(A,B,A,C,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(B,A,A,C,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+
+
+esCuadradoFantasticoSecreto(Matriz, NumSecreto) :- primero(Matriz, PrimeraFila), colaPeano(Matriz, UltimaFila), primero(PrimeraFila,A), colaPeano(PrimeraFila,B), primero(UltimaFila,C), colaPeano(UltimaFila,D), comprobarSecreto(A,B,C,D,NumSecreto).
