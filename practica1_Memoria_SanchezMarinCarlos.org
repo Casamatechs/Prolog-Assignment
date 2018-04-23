@@ -1,0 +1,6 @@
+#+TITLE: Memoria de la práctica 1 
+#+DATE: 04/05/2018
+#+AUTHOR: Carlos Sánchez Marín
+#+EMAIL: carlos.sanchez.marin@alumnos.upm.es
+#+OPTIONS: email:t
+
