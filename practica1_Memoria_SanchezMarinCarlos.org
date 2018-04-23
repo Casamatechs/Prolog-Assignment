@@ -1,6 +1,49 @@
-#+TITLE: Memoria de la práctica 1 
-#+DATE: 04/05/2018
-#+AUTHOR: Carlos Sánchez Marín
+#+AUTHOR:Carlos Sánchez Marín
 #+EMAIL: carlos.sanchez.marin@alumnos.upm.es
-#+OPTIONS: email:t
+#+TITLE: Memoria Práctica de Lógica Pura
+#+LANGUAGE: es
+#+LATEX_HEADER: \usepackage[AUTO]{babel}
+#+OPTIONS: toc:t email:t
+#+OPTIONS: texht:t
+#+OPTIONS: ^:{} _:{}
+#+LATEX_CLASS:article
+#+LATEX_CLASS_OPTIONS:[a4paper]
+#+LATEX_HEADER: \addtolength{\textwidth}{2in}
+#+LATEX_HEADER: \addtolength{\hoffset}{-0.7in}
+#+LATEX_HEADER: \addtolength{\voffset}{-0.7in}
 
+#+LATEX: \newpage
+
+* *Ejercicio 1*
+** *Predicados implementados*
+*** *numero(NumeroPeano)*
+Predicado de aridad 1 que se hace cierto si ~NumeroPeano~ es un número en representación de Peano.
+
+#+begin_src prolog
+numero(0).
+numero(s(X)) :- numero(X).
+#+end_src
+
+*** *esNumero(NumeroPeano)*
+Predicado de aridad 1 que se hace cierto si ~NumeroPeano~ es un número en representación de Peano o ~NumeroPeano~ es una lista cuya cabeza es un número en notación de Peano.
+
+#+begin_src prolog
+esNumero(X) :- numero(X).
+esNumero([X|[]]) :- numero(X).
+esNumero([X|Y]) :- numero(X), esNumero(Y).
+#+end_src
+
+*** *numOriginal(NOriginal)*
+Predicado de aridad 1 que se hace cierto si ~NOriginal~ es una lista que contiene una lista de 3 elementos, siendo el primero y el tercero una lista de numeros en representación de Peano y el segundo una coma.
+
+#+begin_src prolog
+numOriginal([ParteEntera|[','|[ParteDecimal|[]]]]) :- esNumero(ParteEntera), esNumero(ParteDecimal).
+#+end_src
+
+*** *colaPeano(ListaPeano,UltimoNumero)*
+Predicado de aridad 2 que se hace cierto si ~UltimoNumero~ es el último elemento de ~ListaPeano~.
+
+#+begin_src
+listaPeano([]).
+listaPeano([X|Y]) :- numero(X), listaPeano(Y).
+#+end_src
