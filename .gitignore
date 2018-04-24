@@ -1,3 +1,6 @@
 *.po
 *.pl~
 *.itf
+*.tex*
+*.pdf
+*.html*
