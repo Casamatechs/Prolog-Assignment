@@ -120,3 +120,28 @@ Predicado de aridad 3 que se hace cierto cuando ~ListaSinNueves~ es una lista re
 quitarNueve(X,X,[]).
 quitarNueve([X|XX], Y, [X|ZZ]) :- quitarNueve(XX,Y,ZZ).
 #+end_src
+*** *igual(X,X)*
+Predicado de aridad 2 que se hace cierto si los dos elementos son iguales
+
+#+begin_src prolog
+igual(X,X).
+#+end_src
+
+*** *mayor(Numero)*
+Predicado de aridad 1 que se hace cierto si ~Numero~ es mayor o igual que 5.
+
+#+begin_src prolog
+mayor(s(s(s(s(s(0)))))).
+mayor(s(X)) :- mayor(X).
+#+end_src
+
+*** *menor(Numero)*
+Predicado de aridad 1 que se hace cierto si ~Numero~ tiene un valor entre 0 y 4.
+
+#+begin_src prolog
+menor(0).
+menor(s(0)).
+menor(s(s(0))).
+menor(s(s(s(0)))).
+menor(s(s(s(s(0))))).
+#+end_src
