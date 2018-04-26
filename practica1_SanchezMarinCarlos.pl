@@ -60,8 +60,10 @@ suma(X,Y) :- colaPeano(X,ULT), \=(ULT,s(s(s(s(s(s(s(s(s(0)))))))))), inicio(X, I
 
 redondear(redondeoUnidad, OrEnt, [Decim|_], RedEnt, []) :- mayor(Decim), suma(OrEnt, Y), igual(Y,RedEnt).
 redondear(redondeoUnidad, X, [Decim|_], X, []) :- menor(Decim).
+redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, []) :- mayor(Cent), checkNueves([Decim],[]), suma(OrEnt,RedEnt).
 redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, [RedDec|[]]) :- mayor(Cent), concat(OrEnt, [Decim], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec],DEV).
 redondear(redondeoDecima, X, [Decim|[Cent|_]], X, [Decim|[]]) :- menor(Cent).
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, []) :- mayor(Mili), concat([Decim],[Cent],DEC), checkNueves(DEC,[]), suma(OrEnt,RedEnt).
 redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :- mayor(Mili), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
 redondear(redondeoCentesima, X, [Decim|[Cent|[Mili|_]]], X, [Decim|[Cent|[]]]) :- menor(Mili).
 
