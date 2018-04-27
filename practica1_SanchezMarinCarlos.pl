@@ -37,15 +37,9 @@ convertZero([_|X],[0|Y]) :- convertZero(X,Y).
 checkNueves([s(s(s(s(s(s(s(s(s(0)))))))))|[]],[]).
 checkNueves([s(s(s(s(s(s(s(s(s(0)))))))))|Y],[]) :- checkNueves(Y,[]).
 
-checkNotOnlyNueves(s(s(s(s(s(s(s(s(0))))))))).
-checkNotOnlyNueves(s(s(s(s(s(s(s(0)))))))).
-checkNotOnlyNueves(s(s(s(s(s(s(0))))))).
-checkNotOnlyNueves(s(s(s(s(s(0)))))).
-checkNotOnlyNueves(s(s(s(s(0))))).
-checkNotOnlyNueves(s(s(s(0)))).
-checkNotOnlyNueves(s(s(0))).
-checkNotOnlyNueves(s(0)).
-checkNotOnlyNueves(0).
+checkNotOnlyNueves(X) :- checkNotOnlyNueves_(X,s(s(s(s(s(s(s(s(s(0)))))))))).
+checkNotOnlyNueves_(0,s(_)).
+checkNotOnlyNueves_(s(X),s(Y)) :- checkNotOnlyNueves_(X,Y).
 
 quitarNueve(X,X,[]).
 quitarNueve([X|XX], Y, [X|ZZ]) :- quitarNueve(XX,Y,ZZ).
@@ -55,11 +49,9 @@ igual(X,X).
 mayor(s(s(s(s(s(0)))))).
 mayor(s(X)) :- mayor(X).
 
-menor(0).
-menor(s(0)).
-menor(s(s(0))).
-menor(s(s(s(0)))).
-menor(s(s(s(s(0))))).
+menor(X) :- menor_(X,s(s(s(s(s(0)))))).
+menor_(0,s(_)).
+menor_(s(X),s(Y)) :- menor_(X,Y).
 
 suma([],[s(0)]).
 suma(X,Y) :- colaPeano(X,ULT), igual(ULT,s(s(s(s(s(s(s(s(s(0)))))))))), soloNueve(X,NUEVES), quitarNueve(X,NUEVES,NONUEVE), convertZero(NUEVES,ZEROS), suma(NONUEVE,RT), concat(RT,ZEROS,DEV), igual(DEV,Y).
