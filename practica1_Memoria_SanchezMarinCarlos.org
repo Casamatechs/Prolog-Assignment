@@ -26,19 +26,12 @@ numero(s(X)) :- numero(X).
 #+end_src
 
 *** *esNumero(NumeroPeano)*
-Predicado de aridad 1 que se hace cierto si ~NumeroPeano~ es un número en representación de Peano o ~NumeroPeano~ es una lista cuya cabeza es un número en notación de Peano.
+Predicado de aridad 1 que se hace cierto si ~NumeroPeano~ es un número en representación de Peano o ~NumeroPeano~ es una lista cuya cabeza es un número en notación de Peano. Este predicado para hacerse verdadero requiere que los predicados ~parteEntera/1~ y ~parteDecimal/1~ también sean ciertos.
 
 #+begin_src prolog
 esNumero(X) :- numero(X).
 esNumero([X|[]]) :- numero(X).
 esNumero([X|Y]) :- numero(X), esNumero(Y).
-#+end_src
-
-*** *numOriginal(NOriginal)*
-Predicado de aridad 1 que se hace cierto si ~NOriginal~ es una lista que contiene una lista de 3 elementos, siendo el primero y el tercero una lista de numeros en representación de Peano y el segundo una coma.
-
-#+begin_src prolog
-numOriginal([ParteEntera|[','|[ParteDecimal|[]]]]) :- esNumero(ParteEntera), esNumero(ParteDecimal).
 #+end_src
 
 *** *colaPeano(ListaPeano,UltimoNumero)*
@@ -49,13 +42,6 @@ colaPeano([X|[]],X).
 colaPeano([_|X],Y) :- colaPeano(X,Y).
 #+end_src
 
-*** *numRedondeo(',',ParteEntera,ParteDecimal)*
-Predicado de aridad 3 que se hace cierto si ~ParteEntera~ y ~ParteDecimal~ son listas compuestas por números en representación de Peano.
-
-#+begin_src prolog
-numRedondeo(',', ParteEntera, ParteDecimal) :- listaPeano(ParteEntera), listaPeano(ParteDecimal).
-#+end_src
-
 *** *listaPeano(ListaNumeros)*
 Predicado de aridad 1 que se hace cierto si ~ListaNumeros~ está compuesta por números en representación de Peano.
 
@@ -63,6 +49,7 @@ Predicado de aridad 1 que se hace cierto si ~ListaNumeros~ está compuesta por n
 listaPeano([]).
 listaPeano([X|Y]) :- numero(X), listaPeano(Y).
 #+end_src
+
 *** *esVacio(Lista)*
 Predicado de aridad 1 que se hace cierto cuando ~Lista~ está vacía.
 
@@ -77,12 +64,14 @@ Predicado de aridad 2 que se hace cierto si ~ListaSinCola~ es igual a ~ListaOrig
 inicio([X],[]) :- numero(X).
 inicio([X|Z],[X|W]) :- inicio(Z,W).
 #+end_src
+
 *** *primero(ListaPeano,PrimerNumero)*
 Predicado de aridad 2 que se hace cierto si ~PrimerNumero~ es la cabeza de ~ListaPeano~.
 
 #+begin_src prolog
 primero([X|_],X).
 #+end_src
+
 *** *quitarCabeza(ListaOriginal,ListaSinCabeza)*
 Predicado de aridad 2 que se hace cierto si ~ListaSinCabeza~ es ~ListaOriginal~ sin su primer elemento.
 
@@ -97,6 +86,7 @@ Predicado de aridad 3 que se hace cierto si ~ListaUnion~ es igual a la concatena
 concat([],Xfinal, Xfinal) :- listaPeano(Xfinal).
 concat([X|Y],Z, [X|Xfinal]) :- numero(X), concat(Y,Z,Xfinal).
 #+end_src
+
 *** *soloNueve(ListaOriginal,ListaNueves)*
 Predicado de aridad 2 que se hace cierto cuando ~ListaNueves~ es una lista que contiene todos los nueves seguidos desde la cola de ~ListaOriginal~.
 
@@ -113,6 +103,7 @@ Predicado de aridad 2 que se hace cierto cuando ~ListaCeros~ es una lista de cer
 convertZero([],[]).
 convertZero([_|X],[0|Y]) :- convertZero(X,Y).
 #+end_src
+
 *** *quitarNueve(ListaOriginal,ListaNueves,ListaSinNueves)*
 Predicado de aridad 3 que se hace cierto cuando ~ListaSinNueves~ es una lista resultado de truncar por la cola ~ListaOriginal~ siendo esta igual a ~ListaNueves~.
 
@@ -120,6 +111,7 @@ Predicado de aridad 3 que se hace cierto cuando ~ListaSinNueves~ es una lista re
 quitarNueve(X,X,[]).
 quitarNueve([X|XX], Y, [X|ZZ]) :- quitarNueve(XX,Y,ZZ).
 #+end_src
+
 *** *igual(X,X)*
 Predicado de aridad 2 que se hace cierto si los dos elementos son iguales
 

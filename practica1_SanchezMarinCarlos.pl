@@ -4,17 +4,16 @@ alumno_prode('Marin','Sanchez','Carlos','120131').
 numero(0).
 numero(s(X)) :- numero(X).
 
-numOriginal([ParteEntera|[','|[ParteDecimal|[]]]]) :- esNumero(ParteEntera), esNumero(ParteDecimal).
-numRedondeo(',', ParteEntera, ParteDecimal) :- listaPeano(ParteEntera), listaPeano(ParteDecimal).
+esNumero([X|Y]) :- numero(X), parteEntera(Y).
 
-esNumero(X) :- numero(X).
-esNumero([X|[]]) :- numero(X).
-esNumero([X|Y]) :- numero(X), esNumero(Y).
+parteEntera([','|X]) :- parteDecimal(X).
+parteEntera([X|Y]) :- numero(X), parteEntera(Y).
+
+parteDecimal([]).
+parteDecimal([X|Y]) :- numero(X), parteDecimal(Y).
 
 listaPeano([]).
 listaPeano([X|Y]) :- numero(X), listaPeano(Y).
-
-esVacio([]).
 
 colaPeano([X|[]],X).
 colaPeano([_|X],Y) :- colaPeano(X,Y).
@@ -28,8 +27,6 @@ quitarCabeza([_|X],X).
 concat([],Xfinal, Xfinal) :- listaPeano(Xfinal).
 concat([X|Y],Z, [X|Xfinal]) :- numero(X), concat(Y,Z,Xfinal).
 
-sigueNueve(X,Y,Z) :- igual(X,s(s(s(s(s(s(s(s(s(0)))))))))), quitarCabeza(Y,Y2), igual([s(0)|[0|Y2]],Z).
-
 soloNueve([],[]).
 soloNueve(X,[]) :- colaPeano(X,Y), \=(Y,s(s(s(s(s(s(s(s(s(0)))))))))).
 soloNueve(X,[s(s(s(s(s(s(s(s(s(0)))))))))|Y]) :- inicio(X,Z), colaPeano(X,XX), igual(XX,s(s(s(s(s(s(s(s(s(0)))))))))), soloNueve(Z,Y).
@@ -39,6 +36,16 @@ convertZero([_|X],[0|Y]) :- convertZero(X,Y).
 
 checkNueves([s(s(s(s(s(s(s(s(s(0)))))))))|[]],[]).
 checkNueves([s(s(s(s(s(s(s(s(s(0)))))))))|Y],[]) :- checkNueves(Y,[]).
+
+checkNotOnlyNueves(s(s(s(s(s(s(s(s(0))))))))).
+checkNotOnlyNueves(s(s(s(s(s(s(s(0)))))))).
+checkNotOnlyNueves(s(s(s(s(s(s(0))))))).
+checkNotOnlyNueves(s(s(s(s(s(0)))))).
+checkNotOnlyNueves(s(s(s(s(0))))).
+checkNotOnlyNueves(s(s(s(0)))).
+checkNotOnlyNueves(s(s(0))).
+checkNotOnlyNueves(s(0)).
+checkNotOnlyNueves(0).
 
 quitarNueve(X,X,[]).
 quitarNueve([X|XX], Y, [X|ZZ]) :- quitarNueve(XX,Y,ZZ).
@@ -56,18 +63,18 @@ menor(s(s(s(s(0))))).
 
 suma([],[s(0)]).
 suma(X,Y) :- colaPeano(X,ULT), igual(ULT,s(s(s(s(s(s(s(s(s(0)))))))))), soloNueve(X,NUEVES), quitarNueve(X,NUEVES,NONUEVE), convertZero(NUEVES,ZEROS), suma(NONUEVE,RT), concat(RT,ZEROS,DEV), igual(DEV,Y).
-suma(X,Y) :- colaPeano(X,ULT), \=(ULT,s(s(s(s(s(s(s(s(s(0)))))))))), inicio(X, INI), concat(INI,[s(ULT)],DEV), igual(DEV,Y).
+suma(X,Y) :- colaPeano(X,ULT), checkNotOnlyNueves(ULT), inicio(X, INI), concat(INI,[s(ULT)],DEV), igual(DEV,Y).
 
 redondear(redondeoUnidad, OrEnt, [Decim|_], RedEnt, []) :- mayor(Decim), suma(OrEnt, Y), igual(Y,RedEnt).
 redondear(redondeoUnidad, X, [Decim|_], X, []) :- menor(Decim).
 redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, []) :- mayor(Cent), checkNueves([Decim],[]), suma(OrEnt,RedEnt).
-redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, [RedDec|[]]) :- mayor(Cent), concat(OrEnt, [Decim], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec],DEV).
+redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, [RedDec|[]]) :- mayor(Cent), checkNotOnlyNueves(Decim), concat(OrEnt, [Decim], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec],DEV).
 redondear(redondeoDecima, X, [Decim|[Cent|_]], X, [Decim|[]]) :- menor(Cent).
 redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, []) :- mayor(Mili), concat([Decim],[Cent],DEC), checkNueves(DEC,[]), suma(OrEnt,RedEnt).
-redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :- mayor(Mili), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :- mayor(Mili), checkNotOnlyNueves(Decim), checkNotOnlyNueves(Cent), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
 redondear(redondeoCentesima, X, [Decim|[Cent|[Mili|_]]], X, [Decim|[Cent|[]]]) :- menor(Mili).
 
-redondearDecimal(NOrig, TipoRedondeo, redondeo(TipoRedondeo, numeroOriginal(',', OrEnt, OrDec), numeroRedondeado(',', RedEnt, RedDec))) :- numOriginal(NOrig), redondear(TipoRedondeo, OrEnt, OrDec, RedEnt, RedDec).
+redondearDecimal(NOrig, TipoRedondeo, redondeo(TipoRedondeo, numeroOriginal(',', OrEnt, OrDec), numeroRedondeado(',', RedEnt, RedDec))) :- esNumero(NOrig), redondear(TipoRedondeo, OrEnt, OrDec, RedEnt, RedDec).
 
 %%% EJERCICIO 2
 
