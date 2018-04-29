@@ -63,7 +63,10 @@ redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, []) :- mayor(Cent), c
 redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, [RedDec|[]]) :- mayor(Cent), checkNotOnlyNueves(Decim), concat(OrEnt, [Decim], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec],DEV).
 redondear(redondeoDecima, X, [Decim|[Cent|_]], X, [Decim|[]]) :- menor(Cent).
 redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, []) :- mayor(Mili), concat([Decim],[Cent],DEC), checkNueves(DEC,[]), suma(OrEnt,RedEnt).
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], OrEnt, [RedDec|[]]) :- mayor(Mili), checkNotOnlyNueves(Decim), checkNueves([Cent],[]), suma([Decim],[RedDec]).
 redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :- mayor(Mili), checkNotOnlyNueves(Decim), checkNotOnlyNueves(Cent), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :- mayor(Mili), checkNotOnlyNueves(Decim), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :- mayor(Mili), checkNotOnlyNueves(Cent), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
 redondear(redondeoCentesima, X, [Decim|[Cent|[Mili|_]]], X, [Decim|[Cent|[]]]) :- menor(Mili).
 
 redondearDecimal(NOrig, TipoRedondeo, redondeo(TipoRedondeo, numeroOriginal(',', OrEnt, OrDec), numeroRedondeado(',', RedEnt, RedDec))) :- esNumero(NOrig), redondear(TipoRedondeo, OrEnt, OrDec, RedEnt, RedDec).
