@@ -12,6 +12,12 @@ parteEntera([X|Y]) :- numero(X), parteEntera(Y).
 parteDecimal([]).
 parteDecimal([X|Y]) :- numero(X), parteDecimal(Y).
 
+sacarParteEntera([','|_],[]).
+sacarParteEntera([X|Y],[X|Z]) :- sacarParteEntera(Y,Z).
+
+sacarParteDecimal([','|X],X).
+sacarParteDecimal([_|X],Y) :- sacarParteDecimal(X,Y).
+
 listaPeano([]).
 listaPeano([X|Y]) :- numero(X), listaPeano(Y).
 
@@ -69,7 +75,7 @@ redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[Re
 redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :- mayor(Mili), checkNotOnlyNueves(Cent), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
 redondear(redondeoCentesima, X, [Decim|[Cent|[Mili|_]]], X, [Decim|[Cent|[]]]) :- menor(Mili).
 
-redondearDecimal(NOrig, TipoRedondeo, redondeo(TipoRedondeo, numeroOriginal(',', OrEnt, OrDec), numeroRedondeado(',', RedEnt, RedDec))) :- esNumero(NOrig), redondear(TipoRedondeo, OrEnt, OrDec, RedEnt, RedDec).
+redondearDecimal(NOrig, TipoRedondeo, redondeo(TipoRedondeo, numeroOriginal(',', OrEnt, OrDec), numeroRedondeado(',', RedEnt, RedDec))) :- esNumero(NOrig), sacarParteEntera(NOrig,OrEnt), sacarParteDecimal(NOrig,OrDec), redondear(TipoRedondeo, OrEnt, OrDec, RedEnt, RedDec).
 
 %%% EJERCICIO 2
 
