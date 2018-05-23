@@ -104,6 +104,23 @@ convertZero([],[]).
 convertZero([_|X],[0|Y]) :- convertZero(X,Y).
 #+end_src
 
+*** *checkNueves(ListaNueves,[])*
+Predicado de aridad 2 que se hace cierto cuando la lista ~ListaNueves~ esta compuesta solo por nueves en representación de Peano.
+
+#+begin_src prolog
+checkNueves([s(s(s(s(s(s(s(s(s(0)))))))))|[]],[]).
+checkNueves([s(s(s(s(s(s(s(s(s(0)))))))))|Y],[]) :- checkNueves(Y,[]).
+#+end_src
+
+*** *checkNotOnlyNueves(ListaNoNueves)*
+Predicado de aridad 1 que se hace cierto cuando ~ListaNoNueves~ no está formada solo por nueves en representación de Peano.
+
+#+begin_src prolog
+checkNotOnlyNueves(X) :- checkNotOnlyNueves_(X,s(s(s(s(s(s(s(s(s(0)))))))))).
+checkNotOnlyNueves_(0,s(_)).
+checkNotOnlyNueves_(s(X),s(Y)) :- checkNotOnlyNueves_(X,Y).
+#+end_src
+
 *** *quitarNueve(ListaOriginal,ListaNueves,ListaSinNueves)*
 Predicado de aridad 3 que se hace cierto cuando ~ListaSinNueves~ es una lista resultado de truncar por la cola ~ListaOriginal~ siendo esta igual a ~ListaNueves~.
 
@@ -131,9 +148,184 @@ mayor(s(X)) :- mayor(X).
 Predicado de aridad 1 que se hace cierto si ~Numero~ tiene un valor entre 0 y 4.
 
 #+begin_src prolog
-menor(0).
-menor(s(0)).
-menor(s(s(0))).
-menor(s(s(s(0)))).
-menor(s(s(s(s(0))))).
+menor(X) :- menor_(X,s(s(s(s(s(0)))))).
+menor_(0,s(_)).
+menor_(s(X),s(Y)) :- menor_(X,Y).
+#+end_src
+*** *suma(NumOriginal,NumSumado)*
+Predicado de aridad 2 que se hace cierto si sumando 1 a ~NumOriginal~ obtenemos como resultado ~NumSumado~.
+
+#+begin_src prolog
+suma([],[s(0)]).
+suma(X,Y) :- colaPeano(X,ULT), igual(ULT,s(s(s(s(s(s(s(s(s(0)))))))))), soloNueve(X,NUEVES),
+quitarNueve(X,NUEVES,NONUEVE), convertZero(NUEVES,ZEROS), suma(NONUEVE,RT),
+concat(RT,ZEROS,DEV), igual(DEV,Y).
+
+suma(X,Y) :- colaPeano(X,ULT), checkNotOnlyNueves(ULT), inicio(X, INI),
+concat(INI,[s(ULT)],DEV), igual(DEV,Y).
+#+end_src
+
+*** *redondear(TipoRedondeo,NumOriginal,NumRedondeado)*
+Predicado de aridad 3 que se hace cierto si aplicando el tipo de redondeo especificado por ~TipoRedondeo~ a ~NumOriginal~ se obtiene como resultado ~NumRedondeado~.
+
+#+begin_src prolog
+redondear(redondeoUnidad, OrEnt, [Decim|_], RedEnt, []) :- mayor(Decim), suma(OrEnt, Y),
+igual(Y,RedEnt).
+
+redondear(redondeoUnidad, X, [Decim|_], X, []) :- menor(Decim).
+
+redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, []) :- mayor(Cent),
+checkNueves([Decim],[]), suma(OrEnt,RedEnt).
+
+redondear(redondeoDecima, OrEnt, [Decim|[Cent|_]], RedEnt, [RedDec|[]]) :- mayor(Cent),
+checkNotOnlyNueves(Decim), concat(OrEnt, [Decim], ORIG), suma(ORIG,SUM), igual(SUM,DEV),
+concat(RedEnt,[RedDec],DEV).
+
+redondear(redondeoDecima, X, [Decim|[Cent|_]], X, [Decim|[]]) :- menor(Cent).
+
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, []) :- mayor(Mili),
+concat([Decim],[Cent],DEC), checkNueves(DEC,[]), suma(OrEnt,RedEnt).
+
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], OrEnt, [RedDec|[]]) :- mayor(Mili),
+checkNotOnlyNueves(Decim), checkNueves([Cent],[]), suma([Decim],[RedDec]).
+
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :-
+mayor(Mili), checkNotOnlyNueves(Decim), checkNotOnlyNueves(Cent), concat(OrEnt, [Decim,Cent], ORIG),
+suma(ORIG,SUM), igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
+
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :-
+mayor(Mili), checkNotOnlyNueves(Decim), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM),
+igual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
+
+redondear(redondeoCentesima, OrEnt, [Decim|[Cent|[Mili|_]]], RedEnt, [RedDec|[RedCent|[]]]) :-
+mayor(Mili), checkNotOnlyNueves(Cent), concat(OrEnt, [Decim,Cent], ORIG), suma(ORIG,SUM),
+lligual(SUM,DEV), concat(RedEnt,[RedDec,RedCent], DEV).
+
+redondear(redondeoCentesima, X, [Decim|[Cent|[Mili|_]]], X, [Decim|[Cent|[]]]) :- menor(Mili).
+#+end_src
+
+*** *redondearDecimal(NumeroInicial,TipoRedondeo,NumeroFinal)*
+Predicado de aridad 3 que se hace cierto si aplicando el tipo de redondeo especificado por ~TipoRedondeo~ a ~NumeroInicial~ se obtiene como resultado ~NumeroFinal~. Este predicado es el implementado siguiendo las instrucciones del guión de la práctica.
+
+#+begin_src prolog
+redondearDecimal(NOrig, TipoRedondeo, redondeo(TipoRedondeo, numeroOriginal(',', OrEnt, OrDec),
+numeroRedondeado(',', RedEnt, RedDec))) :- esNumero(NOrig),
+redondear(TipoRedondeo, OrEnt, OrDec, RedEnt, RedDec).
+#+end_src
+** *Pruebas realizadas*
+
+#+begin_src prolog
+?- redondearDecimal([s(s(s(s(s(0))))),',',s(s(s(0)))],redondeoUnidad,
+redondeo(redondeoUnidad,numeroOriginal(',',[s(s(s(s(s(0)))))],[s(s(s(0)))]),
+numeroRedondeado(',',ParteEnteraRedondeada,ParteDecimalRedondeada))).
+
+ParteDecimalRedondeada = [],
+ParteEnteraRedondeada = [s(s(s(s(s(0)))))] ? .
+
+no
+
+?- redondearDecimal([s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0))))))))),',',
+s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0)))))))))],redondeoDecima, redondeo(redondeoDecima,
+numeroOriginal(',',[s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0)))))))))],
+[s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0)))))))))]),
+numeroRedondeado(',',[s(0),0,0],[]))).
+
+yes
+
+?- redondearDecimal([s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0))))))))),',',
+s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0)))))))))],redondeoDecima, redondeo(redondeoDecima,
+numeroOriginal(',',[s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0)))))))))],
+[s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0)))))))))]),numeroRedondeado(',',[s(0),0,0],[0]))).
+
+no
+
+?- redondearDecimal([s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0))))))))),',',
+s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0)))))))))],
+redondeoDecima,redondeo(redondeoDecima,numeroOriginal(',',
+[s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0)))))))))],
+[s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0))))))))),s(s(s(s(s(s(s(s(s(0)))))))))]),
+numeroRedondeado(',',[s(0),0,0],[]))).
+
+yes
+
+#+end_src
+
+* *Ejercicio 2*
+** *Predicados implementados*
+*** *par(NumeroPar)*
+Predicado de aridad 1 que se hace cierto si ~NumeroPar~ es un número par en representación de Peano.
+
+#+begin_src prolog
+par(s(s(0))).
+par(s(s(X))) :-  par(X).
+#+end_src
+
+*** *sumaSecreto(Sumando1,Sumando2,Resultado)*
+Predicado de aridad 3 que se hace cierto si la suma de ~Sumando1~ y ~Sumando2~ da ~Resultado~.
+
+#+begin_src prolog
+sumaSecreto(0,X,X).
+sumaSecreto(X,0,X).
+sumaSecreto(s(X),Y,s(Z)) :- sumaSecreto(X,Y,Z).
+#+end_src
+
+*** *comprobarSecreto(N1,N2,N3,N4,NumSecreto)*
+Predicado de aridad 4 que se hace cierto si aplicando las normas para que un número sea secreto, ~N1,N2,N3,N4~ las cumplen para que ~NumSecreto~ sea el número secreto.
+
+#+begin_src prolog
+comprobarSecreto(A,B,C,A,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(C,A,B,A,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(B,C,A,A,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(A,A,B,C,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(A,B,A,C,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+comprobarSecreto(B,A,A,C,D) :- par(A), igual(A,D), sumaSecreto(B,C,D).
+#+end_src
+
+*** *esCuadradoFantasticoSecreto(Matriz,NumeroSecreto)*
+Predicado de aridad 2 que se hace cierto si  ~Matriz~ tiene ~NumeroSecreto~.
+
+#+begin_src prolog
+esCuadradoFantasticoSecreto(Matriz, NumSecreto) :- primero(Matriz, PrimeraFila),
+colaPeano(Matriz, UltimaFila), primero(PrimeraFila,A), colaPeano(PrimeraFila,B),
+primero(UltimaFila,C), colaPeano(UltimaFila,D), comprobarSecreto(A,B,C,D,NumSecreto).
+#+end_src
+** *Pruebas realizadas*
+
+#+begin_src prolog
+?- esCuadradoFantasticoSecreto([[s(s(0)),s(s(s(s(0)))),s(s(s(s(s(s(0))))))],
+[s(s(s(s(0)))),s(s(s(s(s(s(0)))))),s(s(0))],[s(s(s(s(s(s(0)))))),s(s(0)),
+s(s(s(s(0))))]],s(s(s(s(s(s(0))))))).
+
+yes
+
+?- esCuadradoFantasticoSecreto([[s(s(0)),s(s(s(s(0)))),s(s(s(s(s(s(0))))))],
+[s(s(s(s(0)))),s(s(s(s(s(s(0)))))),s(s(0))],[s(s(s(s(s(s(0)))))),s(s(0)),s(s(s(s(0))))]],X).
+
+X = s(s(s(s(s(s(0)))))) ?
+yes
+
+?- esCuadradoFantasticoSecreto([[s(s(0)),s(s(s(s(0)))),s(s(s(s(s(s(0))))))],
+[s(s(s(s(0)))),s(s(s(s(s(s(0)))))),s(s(0))],[s(s(s(s(s(s(0)))))),s(s(0)),s(s(s(s(0))))]],X).
+
+X = s(s(s(s(s(s(0)))))) ? .
+
+no
+
+?- esCuadradoFantasticoSecreto([[s(s(0)),s(s(s(s(0)))),s(s(s(s(s(s(0)))))),s(s(s(s(s(s(s(s(0))))))))],
+[s(s(s(s(0)))),s(s(s(s(s(s(0)))))),s(s(s(s(s(s(s(s(0)))))))),s(s(0))],
+[s(s(s(s(s(s(0)))))),s(s(s(s(s(s(s(s(0)))))))),s(s(0)),s(s(s(s(0))))],
+[s(s(s(s(s(s(s(s(0)))))))),s(s(0)),s(s(s(s(0)))),s(s(s(s(s(s(0))))))]],X).
+
+X = s(s(s(s(s(s(s(s(0)))))))) ? .
+
+no
+
+?- esCuadradoFantasticoSecreto([[s(0),s(s(s(s(0)))),s(s(s(s(s(s(s(0))))))),s(s(s(s(s(s(s(s(0))))))))],
+[s(s(s(s(0)))),s(s(s(s(s(s(s(0))))))),s(s(s(s(s(s(s(s(0)))))))),s(0)],
+[s(s(s(s(s(s(s(0))))))),s(s(s(s(s(s(s(s(0)))))))),s(0),s(s(s(s(0))))],
+[s(s(s(s(s(s(s(s(0)))))))),s(0),s(s(s(s(0)))),s(s(s(s(s(s(s(0)))))))]],X).
+
+X = s(s(s(s(s(s(s(s(0)))))))) ?
+
+yes
 #+end_src
