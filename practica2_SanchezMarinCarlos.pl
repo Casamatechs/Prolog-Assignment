@@ -82,3 +82,16 @@ cierre(Lista,Cierre) :-
         N2 is N1-1,
         esCadena(Perm,Perm,N2),
         Perm = Cierre.
+
+cierreUnico(Lista,Cierre) :-
+        N is 3,
+        sacarCombs(Lista,N,Comb),
+        sacarPermUnica(Comb,Cierre).
+
+sacarPermUnica(Comb,PermUni) :-
+        perm(Comb,Perm),
+        length(Perm,N1),
+        N2 is N1-1,
+        esCadena(Perm,Perm,N2),
+        Perm = PermUni,
+        !.
