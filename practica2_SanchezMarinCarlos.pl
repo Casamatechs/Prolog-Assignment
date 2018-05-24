@@ -1,3 +1,5 @@
+alumno_prode('Marin','Sanchez','Carlos','120131').
+
 % No hace falta predicado cierre ya que se van a emplear elementos atómicos. Hay que sacar los extremos no unificados de una cadena.
 conexionEslabon(eslabon(A,B),eslabon(A,C),[B,C]).
 conexionEslabon(eslabon(A,B),eslabon(C,A),[B,C]).
