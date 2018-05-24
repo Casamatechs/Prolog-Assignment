@@ -36,8 +36,7 @@ sacarCombs(Lista,N,Comb) :-
         N2 is N+1,
         length(Lista,N1),
         N2 =< N1,
-        sacarCombs(Lista,N2,Comb);
-        fail.
+        sacarCombs(Lista,N2,Comb).
 
 comb(0,_,[]).
 comb(N,[X|T],[X|Comb]):-
@@ -75,4 +74,11 @@ cierreMinimo(Lista,N) :-
         esCadena(Perm,Perm,N2),
         !.
 
-%cierre(Lista,Cierre)
+cierre(Lista,Cierre) :-
+        N is 3,
+        sacarCombs(Lista,N,Comb),
+        perm(Comb,Perm),
+        length(Perm,N1),
+        N2 is N1-1,
+        esCadena(Perm,Perm,N2),
+        Perm = Cierre.
