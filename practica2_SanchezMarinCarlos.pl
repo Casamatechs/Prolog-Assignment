@@ -18,7 +18,8 @@ extremosIguales(Cadena) :-
 
 % Se empieza desde 1 ya que Prolog suele hacerlo así, y es mejor no mezclar. Anyway, an array always start on 0.
 getNElem([A|_],1,A).
-getNElem([_|C],N,Elem) :- N > 1, %Añadido para evitar recursion infinita, igual no hace falta en un futuro.
+getNElem([_|C],N,Elem) :-
+        N > 1, %Añadido para evitar recursion infinita, igual no hace falta en un futuro.
         N1 is N-1,
         getNElem(C,N1,Elem).
 
@@ -38,6 +39,7 @@ sacarCombs(Lista,N,Comb) :-
         N2 =< N1,
         sacarCombs(Lista,N2,Comb).
 
+% Operación de combinación obtenida de la página http://kti.ms.mff.cuni.cz/~bartak/prolog/combinatorics.html
 comb(0,_,[]).
 comb(N,[X|T],[X|Comb]):-
         N>0,N1 is N-1,
@@ -45,7 +47,7 @@ comb(N,[X|T],[X|Comb]):-
 comb(N,[_|T],Comb):-
         N>0,
         comb(N,T,Comb).
-
+% Operación de combinación obtenida de la página http://kti.ms.mff.cuni.cz/~bartak/prolog/combinatorics.html
 perm([],[]).
 perm(List,[H|Perm]):- borrar(H,List,Rest),perm(Rest,Perm).
 
