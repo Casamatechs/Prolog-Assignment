@@ -22,9 +22,30 @@ getNElem([_|C],N,Elem) :- N > 1, %Añadido para evitar recursion infinita, igual
         N1 is N-1,
         getNElem(C,N1,Elem).
 
+sacarCombs(Lista,3,Comb) :-
+        comb(3,Lista,Comb);
+        N1 is 4,
+        sacarCombs(Lista,N1,Comb).
+
+sacarCombs(Lista,N,Comb) :-
+        N > 3,
+        length(Lista,N1),
+        N =< N1,
+        comb(N,Lista,Comb);
+        N > 3,
+        N2 is N+1,
+        length(Lista,N1),
+        N2 =< N1,
+        sacarCombs(Lista,N2,Comb);
+        fail.
+
 comb(0,_,[]).
-comb(N,[X|T],[X|Comb]):-N>0,N1 is N-1,comb(N1,T,Comb).
-comb(N,[_|T],Comb):-N>0,comb(N,T,Comb).
+comb(N,[X|T],[X|Comb]):-
+        N>0,N1 is N-1,
+        comb(N1,T,Comb).
+comb(N,[_|T],Comb):-
+        N>0,
+        comb(N,T,Comb).
 
 perm([],[]).
 perm(List,[H|Perm]):- borrar(H,List,Rest),perm(Rest,Perm).
@@ -45,23 +66,13 @@ esCadena(Lista,Cadena,N) :-
         N1 is N-1,
         esCadena(NoHead,Cadena,N1).
 
-cierreUnico(Lista,N) :-
-        (N is 3,
-        comb(N,Lista,Comb),
+cierreMinimo(Lista,N) :-
+        N1 is 3,
+        sacarCombs(Lista,N1,Comb),
         perm(Comb,Perm),
-        N1 is N-1,
-        esCadena(Perm,Perm,N1),
-        !);
-        (N2 is N+1,
-         cierreUnico_(Lista,N2)).
-
-cierreUnico_(Lista,N) :-
-        length(Lista,N1),
-        N =< N1,
-        (comb(N,Lista,Comb),
-        perm(Comb,Perm),
-        N2 is N-1;
+        length(Perm,N),
+        N2 is N-1,
         esCadena(Perm,Perm,N2),
-        !);
-        (N3 is N+1,
-         cierreUnico_(Lista,N3)).
+        !.
+
+%cierre(Lista,Cierre)
