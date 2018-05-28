@@ -170,7 +170,7 @@ sacarPermUnica(Comb,PermUni) :-
 
 ** *Pruebas realizadas*
 *** *Pruebas con una lista de 4 eslabones que generan una sola cadena ABCD*
-#+begin_src prolo
+#+begin_src prolog
 ?- cierreMinimo([eslabon(a,b),eslabon(c,b),eslabon(d,a),eslabon(c,d)],Min).
 
 Min = 4 ? .
