@@ -1,0 +1,329 @@
+#+AUTHOR:Carlos Sánchez Marín
+#+EMAIL: carlos.sanchez.marin@alumnos.upm.es
+#+TITLE: Memoria Práctica de ISO-Prolog
+#+LANGUAGE: es
+#+LATEX_HEADER: \usepackage[AUTO]{babel}
+#+OPTIONS: toc:t email:t
+#+OPTIONS: texht:t
+#+OPTIONS: org-src-fontify-natively:t
+#+OPTIONS: ^:{} _:{}
+#+LATEX_CLASS:article
+#+LATEX_CLASS_OPTIONS:[a4paper]
+#+LATEX_HEADER: \addtolength{\textwidth}{2in}
+#+LATEX_HEADER: \addtolength{\hoffset}{-0.7in}
+#+LATEX_HEADER: \addtolength{\voffset}{-0.7in}
+
+#+LATEX: \newpage
+
+** *Predicados usados*
+*** *comb(N,Lista,Combs)*
+Predicado que aridad 3 que devuelve en ~Combs~ todas la combinaciones posibles de tamaño ~N~ de ~Lista~. Implementación obtenida de la página http://kti.ms.mff.cuni.cz/~bartak/prolog/combinatorics.html
+
+#+begin_src prolog
+comb(0,_,[]).
+comb(N,[X|T],[X|Comb]):-
+        N>0,N1 is N-1,
+        comb(N1,T,Comb).
+comb(N,[_|T],Comb):-
+        N>0,
+        comb(N,T,Comb).
+#+end_src
+
+*** *perm(Lista,Perms)*
+Predicado de aridad 2 que devuelve en ~Perms~ todas las permutaciones posibles sobre ~Lista~. Implementación obtenida de la página http://kti.ms.mff.cuni.cz/~bartak/prolog/combinatorics.html
+
+#+begin_src prolog
+perm([],[]).
+perm(List,[H|Perm]):- borrar(H,List,Rest),perm(Rest,Perm).
+
+borrar(X,[X|T],T).
+borrar(X,[H|T],[H|NT]):- borrar(X,T,NT).
+#+end_src
+
+** *Predicados implementados*
+*** *conexionEslabon(Eslabon1,Eslabon2,CierresLibres)*
+Predicado de aridad 3 que recibe dos eslabones y devuelve los extremos sin cerrar.
+
+#+begin_src prolog
+conexionEslabon(eslabon(A,B),eslabon(A,C),[B,C]).
+conexionEslabon(eslabon(A,B),eslabon(C,A),[B,C]).
+conexionEslabon(eslabon(B,A),eslabon(A,C),[B,C]).
+conexionEslabon(eslabon(B,A),eslabon(C,A),[B,C]).
+#+end_src
+
+*** *contiene(Eslabon,Cierre)*
+Predicado de aridad 3 que se hace cierto si ~Eslabon~ contiene ~Cierre~.
+
+#+begin_src prolog
+contiene(eslabon(_,Elem),Elem).
+contiene(eslabon(Elem,_),Elem).
+#+end_src
+
+*** *extremosIguales(Cadena)*
+Predicado de aridad 1 que comprueba si los extremos de una lista cierran de manera satisfactoria la cadena.
+
+#+begin_src prolog
+extremosIguales(Cadena) :-
+        arg(1,Cadena,Eslabon1),
+        arg(2,Cadena,[Eslabon2|_]),
+        conexionEslabon(Eslabon1,Eslabon2,[A,_]),
+        length(Cadena,Length), last(Cadena,Eslabon4),
+        getNElem(Cadena,Length-1,Eslabon3),
+        conexionEslabon(Eslabon3,Eslabon4,[_,B]),
+        A = B.
+#+end_src
+
+*** *getNElem(Lista,Posicion,Elem)*
+Predicado de aridad 3 que recibe ~Lista~ y devuelve ~Elem~ siendo este el elemento en la posición ~Posicion~ de la lista. La lista empieza en 1 +porque patata+ para ser consistente con la implementación de Prolog.
+
+#+begin_src prolog
+getNElem([A|_],1,A).
+getNElem([_|C],N,Elem) :-
+        N > 1,
+        N1 is N-1,
+        getNElem(C,N1,Elem).
+#+end_src
+
+*** *sacarCombs(Lista,Size,Combinacion)*
+Predicado de aridad 3 que saca todas las combinaciones de tamaño ~Size~ de ~Lista~ y las va devolviendo en ~Combinación~. Empieza con combinaciones de tamaño 3 hasta el tamaño de la lista.
+
+#+begin_src prolog
+sacarCombs(Lista,3,Comb) :-
+        comb(3,Lista,Comb);
+        N1 is 4,
+        sacarCombs(Lista,N1,Comb).
+sacarCombs(Lista,N,Comb) :-
+        N > 3,
+        length(Lista,N1),
+        N =< N1,
+        comb(N,Lista,Comb);
+        N > 3,
+        N2 is N+1,
+        length(Lista,N1),
+        N2 =< N1,
+        sacarCombs(Lista,N2,Comb).
+#+end_src
+
+*** *esCadena(Cadena,Cadena,NCierreInt)*
+Predicado de aridad 3 que recibe 2 veces ~Cadena~ ya que emplea una de ellas para la comprobación de los cierres internos y otra para los extremos de la cadena. ~NCierreInt~ es el número de cierres internos que tiene ~Cadena~.
+
+#+begin_src prolog
+esCadena([_|[]],Cadena,0) :- extremosIguales(Cadena).
+esCadena([E1|[E2|[]]],Cadena,1) :-
+        conexionEslabon(E1,E2,_),
+        esCadena([E2],Cadena,0).
+esCadena(Lista,Cadena,N) :-
+        N > 1,
+        getEslabones(Lista,E1,E2,E3),
+        conexionEslabon(E1,E2,[_,ELibre]),
+        contiene(E3,ELibre),
+        arg(2,Lista,NoHead),
+        N1 is N-1,
+        esCadena(NoHead,Cadena,N1).
+#+end_src
+
+*** *cierreMinimo(Lista,N)*
+Predicado de aridad 2 que recibe una lista de eslabones ~Lista~ y devuelve el tamaño ~N~ de la cadena más pequeña posible.
+
+#+begin_src prolog
+cierreMinimo(Lista,N) :-
+        N1 is 3,
+        sacarCombs(Lista,N1,Comb),
+        perm(Comb,Perm),
+        length(Perm,N),
+        N2 is N-1,
+        esCadena(Perm,Perm,N2),
+        !.
+#+end_src
+
+*** *cierre(Lista,Cierre)*
+Predicado de aridad 2 que recibe una lista de eslabones ~Lista~ y devuelve en ~Cierre~ todas las posibles cadenas que se puedan formar.
+
+#+begin_src prolog
+cierre(Lista,Cierre) :-
+        N is 3,
+        sacarCombs(Lista,N,Comb),
+        perm(Comb,Perm),
+        length(Perm,N1),
+        N2 is N1-1,
+        esCadena(Perm,Perm,N2),
+        Perm = Cierre.
+#+end_src
+
+*** *cierreUnico(Lista,Cierre)*
+Predicado de aridad 2 que recibe una lista de eslabones ~Lista~ y devuelve en ~Cierre~ solo una permutaciones de todas las posibles de cada cadena que se pueda formar.
+
+#+begin_src prolog
+cierreUnico(Lista,Cierre) :-
+        N is 3,
+        sacarCombs(Lista,N,Comb),
+        sacarPermUnica(Comb,Cierre).
+
+sacarPermUnica(Comb,PermUni) :-
+        perm(Comb,Perm),
+        length(Perm,N1),
+        N2 is N1-1,
+        esCadena(Perm,Perm,N2),
+        Perm = PermUni,
+        !.
+#+end_src
+
+** *Pruebas realizadas*
+*** *Pruebas con una lista de 4 eslabones que generan una sola cadena ABCD*
+#+begin_src prolo
+?- cierreMinimo([eslabon(a,b),eslabon(c,b),eslabon(d,a),eslabon(c,d)],Min).
+
+Min = 4 ? .
+
+no
+?- cierreUnico([eslabon(a,b),eslabon(c,b),eslabon(d,a),eslabon(c,d)],Cierre).
+
+Cierre = [eslabon(a,b),eslabon(c,b),eslabon(c,d),eslabon(d,a)] ? .
+
+no
+?- cierre([eslabon(a,b),eslabon(c,b),eslabon(d,a),eslabon(c,d)],Cierre).
+
+Cierre = [eslabon(a,b),eslabon(c,b),eslabon(c,d),eslabon(d,a)] ? .
+
+Cierre = [eslabon(a,b),eslabon(d,a),eslabon(c,d),eslabon(c,b)] ? .
+
+Cierre = [eslabon(c,b),eslabon(a,b),eslabon(d,a),eslabon(c,d)] ? .
+
+Cierre = [eslabon(c,b),eslabon(c,d),eslabon(d,a),eslabon(a,b)] ? .
+
+Cierre = [eslabon(d,a),eslabon(a,b),eslabon(c,b),eslabon(c,d)] ? .
+
+Cierre = [eslabon(d,a),eslabon(c,d),eslabon(c,b),eslabon(a,b)] ? .
+
+Cierre = [eslabon(c,d),eslabon(c,b),eslabon(a,b),eslabon(d,a)] ? .
+
+Cierre = [eslabon(c,d),eslabon(d,a),eslabon(a,b),eslabon(c,b)] ? .
+
+no
+#+end_src
+
+*** *Pruebas con una lista de 6 eslabones que generan las cadenas ABCD, ABC, ACD, ABD, BDC*
+
+#+begin_src prolog
+?- cierreMinimo([eslabon(a,b),eslabon(c,b),eslabon(d,a),eslabon(c,d),eslabon(a,c),eslabon(b,d)],Min).
+
+Min = 3 ? .
+
+no
+?- cierreUnico([eslabon(a,b),eslabon(c,b),eslabon(d,a),eslabon(c,d),eslabon(a,c),eslabon(b,d)],Cierre).
+
+Cierre = [eslabon(a,b),eslabon(c,b),eslabon(a,c)] ? .
+
+Cierre = [eslabon(a,b),eslabon(d,a),eslabon(b,d)] ? .
+
+Cierre = [eslabon(c,b),eslabon(c,d),eslabon(b,d)] ? .
+
+Cierre = [eslabon(d,a),eslabon(c,d),eslabon(a,c)] ? .
+
+Cierre = [eslabon(a,b),eslabon(c,b),eslabon(c,d),eslabon(d,a)] ? .
+
+Cierre = [eslabon(a,b),eslabon(a,c),eslabon(c,d),eslabon(b,d)] ? .
+
+Cierre = [eslabon(c,b),eslabon(a,c),eslabon(d,a),eslabon(b,d)] ? .
+
+no
+?- cierre([eslabon(a,b),eslabon(c,b),eslabon(d,a),eslabon(c,d),eslabon(a,c),eslabon(b,d)],Cierre).
+
+Cierre = [eslabon(a,b),eslabon(c,b),eslabon(a,c)] ? .
+
+Cierre = [eslabon(a,b),eslabon(a,c),eslabon(c,b)] ? .
+
+Cierre = [eslabon(c,b),eslabon(a,b),eslabon(a,c)] ? .
+
+Cierre = [eslabon(c,b),eslabon(a,c),eslabon(a,b)] ? .
+
+Cierre = [eslabon(a,c),eslabon(a,b),eslabon(c,b)] ? .
+
+Cierre = [eslabon(a,c),eslabon(c,b),eslabon(a,b)] ? .
+
+Cierre = [eslabon(a,b),eslabon(d,a),eslabon(b,d)] ? .
+
+Cierre = [eslabon(a,b),eslabon(b,d),eslabon(d,a)] ? .
+
+Cierre = [eslabon(d,a),eslabon(a,b),eslabon(b,d)] ? .
+
+Cierre = [eslabon(d,a),eslabon(b,d),eslabon(a,b)] ? .
+
+Cierre = [eslabon(b,d),eslabon(a,b),eslabon(d,a)] ? .
+
+Cierre = [eslabon(b,d),eslabon(d,a),eslabon(a,b)] ? .
+
+Cierre = [eslabon(c,b),eslabon(c,d),eslabon(b,d)] ? .
+
+Cierre = [eslabon(c,b),eslabon(b,d),eslabon(c,d)] ? .
+
+Cierre = [eslabon(c,d),eslabon(c,b),eslabon(b,d)] ? .
+
+Cierre = [eslabon(c,d),eslabon(b,d),eslabon(c,b)] ? .
+
+Cierre = [eslabon(b,d),eslabon(c,b),eslabon(c,d)] ? .
+
+Cierre = [eslabon(b,d),eslabon(c,d),eslabon(c,b)] ? .
+
+Cierre = [eslabon(d,a),eslabon(c,d),eslabon(a,c)] ? .
+
+Cierre = [eslabon(d,a),eslabon(a,c),eslabon(c,d)] ? .
+
+Cierre = [eslabon(c,d),eslabon(d,a),eslabon(a,c)] ? .
+
+Cierre = [eslabon(c,d),eslabon(a,c),eslabon(d,a)] ? .
+
+Cierre = [eslabon(a,c),eslabon(d,a),eslabon(c,d)] ? .
+
+Cierre = [eslabon(a,c),eslabon(c,d),eslabon(d,a)] ? .
+
+Cierre = [eslabon(a,b),eslabon(c,b),eslabon(c,d),eslabon(d,a)] ? .
+
+Cierre = [eslabon(a,b),eslabon(d,a),eslabon(c,d),eslabon(c,b)] ? .
+
+Cierre = [eslabon(c,b),eslabon(a,b),eslabon(d,a),eslabon(c,d)] ? .
+
+Cierre = [eslabon(c,b),eslabon(c,d),eslabon(d,a),eslabon(a,b)] ? .
+
+Cierre = [eslabon(d,a),eslabon(a,b),eslabon(c,b),eslabon(c,d)] ? .
+
+Cierre = [eslabon(d,a),eslabon(c,d),eslabon(c,b),eslabon(a,b)] ? .
+
+Cierre = [eslabon(c,d),eslabon(c,b),eslabon(a,b),eslabon(d,a)] ? .
+
+Cierre = [eslabon(c,d),eslabon(d,a),eslabon(a,b),eslabon(c,b)] ? .
+
+Cierre = [eslabon(a,b),eslabon(a,c),eslabon(c,d),eslabon(b,d)] ? .
+
+Cierre = [eslabon(a,b),eslabon(b,d),eslabon(c,d),eslabon(a,c)] ? .
+
+Cierre = [eslabon(c,d),eslabon(a,c),eslabon(a,b),eslabon(b,d)] ? .
+
+Cierre = [eslabon(c,d),eslabon(b,d),eslabon(a,b),eslabon(a,c)] ? .
+
+Cierre = [eslabon(a,c),eslabon(a,b),eslabon(b,d),eslabon(c,d)] ? .
+
+Cierre = [eslabon(a,c),eslabon(c,d),eslabon(b,d),eslabon(a,b)] ? .
+
+Cierre = [eslabon(b,d),eslabon(a,b),eslabon(a,c),eslabon(c,d)] ? .
+
+Cierre = [eslabon(b,d),eslabon(c,d),eslabon(a,c),eslabon(a,b)] ? .
+
+Cierre = [eslabon(c,b),eslabon(a,c),eslabon(d,a),eslabon(b,d)] ? .
+
+Cierre = [eslabon(c,b),eslabon(b,d),eslabon(d,a),eslabon(a,c)] ? .
+
+Cierre = [eslabon(d,a),eslabon(a,c),eslabon(c,b),eslabon(b,d)] ? .
+
+Cierre = [eslabon(d,a),eslabon(b,d),eslabon(c,b),eslabon(a,c)] ? .
+
+Cierre = [eslabon(a,c),eslabon(c,b),eslabon(b,d),eslabon(d,a)] ? .
+
+Cierre = [eslabon(a,c),eslabon(d,a),eslabon(b,d),eslabon(c,b)] ? .
+
+Cierre = [eslabon(b,d),eslabon(c,b),eslabon(a,c),eslabon(d,a)] ? .
+
+Cierre = [eslabon(b,d),eslabon(d,a),eslabon(a,c),eslabon(c,b)] ? .
+
+no
+#+end_src
