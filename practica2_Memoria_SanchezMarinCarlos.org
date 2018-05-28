@@ -202,7 +202,7 @@ Cierre = [eslabon(c,d),eslabon(d,a),eslabon(a,b),eslabon(c,b)] ? .
 no
 #+end_src
 
-*** *Pruebas con una lista de 6 eslabones que generan las cadenas ABCD, ABC, ACD, ABD, BDC*
+*** *Pruebas con una lista de 6 eslabones que generan las cadenas ABCD, BACD, BCAD, ABC, ACD, ABD, BDC*
 
 #+begin_src prolog
 ?- cierreMinimo([eslabon(a,b),eslabon(c,b),eslabon(d,a),eslabon(c,d),eslabon(a,c),eslabon(b,d)],Min).
